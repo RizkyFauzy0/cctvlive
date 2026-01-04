@@ -1,0 +1,181 @@
+# MediaMTX Configuration for cctvlive
+# This is a sample configuration file for MediaMTX
+# Place this file in the same directory as the mediamtx binary
+
+###############################################
+# General Configuration
+
+# Log level: debug, info, warn, error
+logLevel: info
+
+# Log destinations: stdout, file, syslog
+logDestinations: [stdout]
+
+# Log file path (when logDestinations includes 'file')
+# logFile: /var/log/mediamtx.log
+
+###############################################
+# API Configuration
+
+# Enable HTTP API
+api: yes
+
+# API HTTP address
+apiAddress: :9997
+
+###############################################
+# RTSP Configuration
+
+# Enable RTSP server
+rtsp: yes
+
+# RTSP address
+rtspAddress: :8554
+
+# Protocols to use for RTSP (udp, multicast, tcp)
+protocols: [tcp, udp]
+
+# Enable RTSP encryption (RTSPS)
+encryption: "no"
+
+###############################################
+# HLS Configuration
+
+# Enable HLS server
+hls: yes
+
+# HLS HTTP address
+hlsAddress: :8888
+
+# Always remux streams (recommended for compatibility)
+hlsAlwaysRemux: yes
+
+# HLS variant: lowLatency, standard
+# lowLatency: Lower latency but requires more resources
+# standard: Higher latency but more stable
+hlsVariant: lowLatency
+
+# Number of HLS segments to keep
+hlsSegmentCount: 7
+
+# Duration of each HLS segment
+hlsSegmentDuration: 1s
+
+# Duration of each HLS part (for low latency)
+hlsPartDuration: 200ms
+
+# Maximum size of each HLS segment
+hlsSegmentMaxSize: 50M
+
+# Allow origin for CORS (use * for all origins)
+hlsAllowOrigin: "*"
+
+# Trusted proxies (if behind reverse proxy)
+# hlsTrustedProxies: []
+
+###############################################
+# WebRTC Configuration (Optional)
+
+# Enable WebRTC server
+webrtc: no
+
+# WebRTC HTTP address
+webrtcAddress: :8889
+
+# WebRTC ICE servers (for NAT traversal)
+# webrtcICEServers:
+#   - url: stun:stun.l.google.com:19302
+
+###############################################
+# Path Configuration
+
+# Default settings for all paths
+paths:
+  # 'all' matches all paths
+  all:
+    # Source type: publisher, rtsp, rtsps, rtmp, rtmps, hls, udp
+    source: publisher
+    
+    # Source on demand: start source only when requested
+    sourceOnDemand: yes
+    
+    # Timeout for starting source on demand
+    sourceOnDemandStartTimeout: 10s
+    
+    # Close source after this duration of inactivity
+    sourceOnDemandCloseAfter: 10s
+    
+    # Run this command when source is started (optional)
+    # runOnDemand: ffmpeg -i rtsp://camera-url -f rtsp rtsp://localhost:$RTSP_PORT/$RTSP_PATH
+    
+    # Run this command when path is ready (optional)
+    # runOnReady: echo "Stream ready: $RTSP_PATH"
+    
+    # Run this command when a client starts reading (optional)
+    # runOnRead: echo "Client reading: $RTSP_PATH"
+
+  # Example: Static RTSP source (uncomment to use)
+  # camera1:
+  #   source: rtsp://admin:password@192.168.1.100:554/stream1
+  #   sourceProtocol: tcp
+  #   sourceOnDemand: yes
+  #   sourceOnDemandStartTimeout: 10s
+  #   sourceOnDemandCloseAfter: 10s
+
+  # Example: FFmpeg transcoding (uncomment to use)
+  # camera2:
+  #   runOnDemand: ffmpeg -i rtsp://admin:password@192.168.1.101:554/stream1
+  #     -c:v copy -c:a aac -f rtsp rtsp://localhost:$RTSP_PORT/$RTSP_PATH
+  #   runOnDemandRestart: yes
+
+###############################################
+# Performance Tuning
+
+# Read buffer size
+readBufferCount: 512
+
+# Maximum number of tracked readers per path
+# Increase this for many concurrent viewers
+# maxReaders: 128
+
+###############################################
+# Metrics (Optional)
+
+# Enable Prometheus metrics
+# metrics: yes
+# metricsAddress: :9998
+
+###############################################
+# PPROF (Optional - for debugging)
+
+# Enable pprof HTTP server
+# pprof: yes
+# pprofAddress: :9999
+
+###############################################
+# Notes:
+# 
+# 1. cctvlive will automatically add camera paths via API
+#    You don't need to manually configure each camera here
+#
+# 2. For production use, consider:
+#    - Using a reverse proxy (nginx) for SSL/TLS
+#    - Adjusting hlsSegmentCount and hlsSegmentDuration for your needs
+#    - Setting up proper logging to file
+#    - Enabling metrics for monitoring
+#
+# 3. Port summary:
+#    - 8554: RTSP server
+#    - 8888: HLS HTTP server
+#    - 8889: WebRTC HTTP server (if enabled)
+#    - 9997: HTTP API
+#
+# 4. For low latency streaming:
+#    - Use hlsVariant: lowLatency
+#    - Set hlsSegmentDuration: 1s
+#    - Set hlsPartDuration: 200ms
+#
+# 5. For high stability/compatibility:
+#    - Use hlsVariant: standard
+#    - Set hlsSegmentDuration: 2s or higher
+#    - Increase hlsSegmentCount to 10 or more

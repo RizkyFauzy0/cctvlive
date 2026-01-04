@@ -408,7 +408,7 @@ try {
             });
             
             hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
-                if (bitrateInfo && data.frag) {
+                if (bitrateInfo && data.frag && data.frag.duration > 0) {
                     const bitrate = Math.round(data.frag.stats.loaded * 8 / data.frag.duration / 1000);
                     bitrateInfo.textContent = bitrate > 0 ? bitrate + ' kbps' : '--';
                 }
