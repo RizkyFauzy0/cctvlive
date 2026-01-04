@@ -43,5 +43,9 @@ function getBaseUrl() {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
     $host = $_SERVER['HTTP_HOST'];
     $script = dirname($_SERVER['SCRIPT_NAME']);
+    
+    // Remove trailing slash if present to avoid double slashes
+    $script = rtrim($script, '/');
+    
     return $protocol . "://" . $host . $script;
 }

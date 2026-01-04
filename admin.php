@@ -211,7 +211,7 @@ try {
                        placeholder="rtsp://username:password@ip:port/stream">
                 <p class="text-xs text-gray-400 mt-1">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Example: rtsp://admin:password@192.168.1.100:554/stream1
+                    Example: rtsp://192.168.1.100:554/stream1 or rtsp://user:pass@192.168.1.100:554/stream1
                 </p>
             </div>
             
