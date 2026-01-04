@@ -1,17 +1,20 @@
 # Live CCTV Manager 📹
 
-A modern web application for managing RTSP camera streams with a beautiful dark-themed UI. Built with PHP, MySQL, and Tailwind CSS.
+A modern web application for managing RTSP camera streams with a beautiful dark-themed UI. Built with PHP, MySQL, and Tailwind CSS. Features integrated MediaMTX support for browser-based HLS streaming.
 
 ## ✨ Features
 
 - **Dashboard View**: Grid display of all active camera streams
 - **Admin Panel**: Full CRUD operations for camera management
 - **Stream Viewer**: Dedicated page for viewing individual camera feeds
+- **MediaMTX Integration**: Built-in support for HLS streaming in browsers
+- **Auto-Registration**: Cameras automatically register with MediaMTX
 - **REST API**: JSON API for programmatic access
 - **Modern UI**: Glass morphism design with smooth animations
 - **Responsive**: Mobile-friendly responsive layout
 - **Secure**: Prepared statements for SQL injection prevention
 - **Unique Stream Keys**: Auto-generated unique identifiers for each camera
+- **HLS Player**: Native browser playback with HLS.js integration
 
 ## 🚀 Quick Start
 
@@ -21,6 +24,7 @@ A modern web application for managing RTSP camera streams with a beautiful dark-
 - MySQL 5.7 or higher
 - Web server (Apache/Nginx)
 - Modern web browser
+- **MediaMTX** (optional, for browser streaming) - See [MediaMTX Installation Guide](INSTALL_MEDIAMTX.md)
 
 ### Installation Options
 
@@ -28,6 +32,7 @@ Choose the installation method that suits your environment:
 
 - 📘 **[Local/VPS Installation](QUICKSTART.md)** - For local development or VPS servers
 - 🌐 **[Shared Hosting & aaPanel](INSTALL_HOSTING.md)** - For cPanel/Shared hosting and aaPanel
+- 🎥 **[MediaMTX Setup](INSTALL_MEDIAMTX.md)** - Enable browser-based HLS streaming
 - 🤖 **Automated Installation** - Use `install.sh` script (Linux/Mac)
 
 ### Quick Installation (Local/VPS)
@@ -68,19 +73,23 @@ Choose the installation method that suits your environment:
 ```
 cctvlive/
 ├── config/
-│   └── database.php          # Database configuration
+│   ├── database.php          # Database configuration
+│   └── mediamtx.php          # MediaMTX configuration
 ├── assets/
 │   └── js/
 │       └── app.js            # Frontend JavaScript
 ├── includes/
 │   ├── header.php            # Common header
-│   └── footer.php            # Common footer
+│   ├── footer.php            # Common footer
+│   └── stream-helper.php     # MediaMTX helper functions
 ├── api/
-│   └── cameras.php           # REST API endpoints
+│   ├── cameras.php           # Camera REST API endpoints
+│   └── mediamtx.php          # MediaMTX API endpoints
 ├── index.php                 # Home page (camera grid)
 ├── admin.php                 # Admin panel
-├── view.php                  # Stream viewer
+├── view.php                  # Stream viewer with HLS player
 ├── database.sql              # Database schema
+├── INSTALL_MEDIAMTX.md       # MediaMTX setup guide
 └── README.md                 # Documentation
 ```
 
@@ -213,35 +222,47 @@ Content-Type: application/json
 DELETE /api/cameras.php?id={id}
 ```
 
-## 🎥 RTSP Stream Playback
+## 🎥 Browser-Based Streaming with MediaMTX
 
-### Important Note
+### Automatic HLS Streaming
 
-RTSP streams **cannot be played directly** in web browsers due to lack of native support. You need to use one of these methods:
+This application now includes **built-in MediaMTX integration** for streaming RTSP cameras directly in web browsers using HLS!
 
-### Method 1: VLC Media Player
+#### Features:
+- ✅ **Auto-registration**: Cameras automatically register with MediaMTX when added
+- ✅ **Browser playback**: Watch streams directly in any modern browser
+- ✅ **Low latency**: Optimized HLS configuration for minimal delay
+- ✅ **Auto-cleanup**: Streams are automatically removed when cameras are deleted
+- ✅ **Status monitoring**: Real-time MediaMTX connection status in admin panel
+
+### Quick Setup
+
+1. **Install MediaMTX** - Follow the [complete installation guide](INSTALL_MEDIAMTX.md)
+
+2. **Add a Camera** - In the admin panel, add your RTSP camera. The stream will automatically register with MediaMTX.
+
+3. **Watch in Browser** - Click "Watch" on any camera to view the live HLS stream in your browser!
+
+### MediaMTX Installation
+
+See the [MediaMTX Installation Guide](INSTALL_MEDIAMTX.md) for:
+- Step-by-step installation instructions
+- Configuration for aaPanel and VPS
+- Firewall setup
+- Troubleshooting tips
+
+### Manual Streaming Methods
+
+If MediaMTX is not installed, you can still use:
+
+#### Method 1: VLC Media Player
 
 1. Open VLC Media Player
 2. Go to **Media** > **Open Network Stream**
 3. Paste the RTSP URL
 4. Click **Play**
 
-### Method 2: Convert to Web-Compatible Format
-
-Use a stream converter like:
-
-#### MediaMTX (Recommended)
-```bash
-# Install MediaMTX
-wget https://github.com/bluenviron/mediamtx/releases/latest/download/mediamtx_linux_amd64.tar.gz
-tar -xzf mediamtx_linux_amd64.tar.gz
-./mediamtx
-
-# Add your RTSP stream to mediamtx.yml
-# Access via HLS: http://localhost:8888/stream_name/
-```
-
-#### FFmpeg
+#### Method 2: FFmpeg
 ```bash
 # Convert RTSP to HLS
 ffmpeg -i rtsp://camera-url -c:v copy -c:a aac -f hls -hls_time 2 -hls_list_size 3 output.m3u8
