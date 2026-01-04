@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/stream-helper.php';
 
 // Require login to access admin panel
 requireLogin();
@@ -31,10 +32,14 @@ try {
     $stmt = $pdo->query("SELECT * FROM cameras ORDER BY created_at DESC");
     $cameras = $stmt->fetchAll();
     
+    // Get MediaMTX status
+    $mediamtxStatus = getMediaMTXStatus();
+    
 } catch (PDOException $e) {
     $cameras = [];
     $error = "Error: " . $e->getMessage();
     $totalCameras = $activeCameras = $inactiveCameras = 0;
+    $mediamtxStatus = ['enabled' => false, 'connected' => false, 'status' => 'unavailable'];
 }
 ?>
 
@@ -54,7 +59,7 @@ try {
 <?php endif; ?>
 
 <!-- Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Total Cameras -->
     <div class="glass rounded-2xl p-6 animate-fade-in">
         <div class="flex items-center justify-between">
@@ -90,6 +95,21 @@ try {
             </div>
             <div class="bg-red-600 w-12 h-12 rounded-lg flex items-center justify-center">
                 <i class="fas fa-times-circle text-xl"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MediaMTX Status -->
+    <div class="glass rounded-2xl p-6 animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-sm mb-1">MediaMTX</p>
+                <p class="text-xl font-bold <?php echo $mediamtxStatus['connected'] ? 'text-green-500' : 'text-gray-500'; ?>">
+                    <?php echo $mediamtxStatus['connected'] ? 'Online' : 'Offline'; ?>
+                </p>
+            </div>
+            <div class="bg-<?php echo $mediamtxStatus['connected'] ? 'green' : 'gray'; ?>-600 w-12 h-12 rounded-lg flex items-center justify-center">
+                <i class="fas fa-server text-xl"></i>
             </div>
         </div>
     </div>
