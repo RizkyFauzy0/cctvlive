@@ -47,3 +47,8 @@ logs/
 # Build artifacts (if any)
 dist/
 build/
+
+# MediaMTX (if downloaded locally - not recommended)
+# mediamtx
+# mediamtx_*
+# *.tar.gz

@@ -6,6 +6,7 @@
 
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/stream-helper.php';
 
 // Handle CORS
 header('Access-Control-Allow-Origin: *');
@@ -140,6 +141,16 @@ function handlePost($pdo) {
         $stmt->execute([$cameraId]);
         $camera = $stmt->fetch();
         
+        // Auto-register stream to MediaMTX if enabled
+        $mediamtxResult = null;
+        if (isMediaMTXEnabled() && MEDIAMTX_AUTO_REGISTER) {
+            $mediamtxResult = registerStreamToMediaMTX($streamKey, $data['rtsp_url']);
+            $camera['mediamtx_registered'] = $mediamtxResult['success'];
+            if ($mediamtxResult['success']) {
+                $camera['hls_url'] = $mediamtxResult['hls_url'];
+            }
+        }
+        
         sendResponse(201, true, 'Camera created successfully', $camera);
     } else {
         sendResponse(500, false, 'Failed to create camera');
@@ -185,6 +196,8 @@ function handlePut($pdo) {
     if (isset($data['rtsp_url'])) {
         $updateFields[] = "rtsp_url = ?";
         $params[] = $data['rtsp_url'];
+        // Track if RTSP URL changed for MediaMTX update
+        $rtspUrlChanged = $data['rtsp_url'] !== $camera['rtsp_url'];
     }
     
     if (isset($data['status']) && in_array($data['status'], ['active', 'inactive'])) {
@@ -208,6 +221,15 @@ function handlePut($pdo) {
         $stmt = $pdo->prepare("SELECT * FROM cameras WHERE id = ?");
         $stmt->execute([$data['id']]);
         $camera = $stmt->fetch();
+        
+        // Update MediaMTX if RTSP URL changed
+        if (isset($rtspUrlChanged) && $rtspUrlChanged && isMediaMTXEnabled()) {
+            $mediamtxResult = updateStreamInMediaMTX($camera['stream_key'], $camera['rtsp_url']);
+            $camera['mediamtx_updated'] = $mediamtxResult['success'];
+            if ($mediamtxResult['success']) {
+                $camera['hls_url'] = $mediamtxResult['hls_url'];
+            }
+        }
         
         sendResponse(200, true, 'Camera updated successfully', $camera);
     } else {
@@ -240,6 +262,11 @@ function handleDelete($pdo) {
     if (!$camera) {
         sendResponse(404, false, 'Camera not found');
         return;
+    }
+    
+    // Unregister from MediaMTX first
+    if (isMediaMTXEnabled() && MEDIAMTX_AUTO_UNREGISTER) {
+        unregisterStreamFromMediaMTX($camera['stream_key']);
     }
     
     // Delete camera

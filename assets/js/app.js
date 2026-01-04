@@ -5,6 +5,7 @@
 
 // Configuration
 const API_BASE = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/api/cameras.php';
+const MEDIAMTX_API_BASE = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/api/mediamtx.php';
 const BASE_URL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
 
 /**
@@ -299,4 +300,89 @@ window.addEventListener('keydown', (e) => {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Live CCTV Manager initialized');
+    
+    // Check MediaMTX status on admin page
+    if (window.location.pathname.includes('admin.php')) {
+        checkMediaMTXStatus();
+    }
 });
+
+// ============= MEDIAMTX FUNCTIONS =============
+
+/**
+ * Check MediaMTX server status
+ */
+async function checkMediaMTXStatus() {
+    try {
+        const response = await fetch(MEDIAMTX_API_BASE + '?action=status');
+        const result = await response.json();
+        
+        if (result.success && result.connected) {
+            console.log('MediaMTX is online');
+        } else {
+            console.warn('MediaMTX is offline');
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('Failed to check MediaMTX status:', error);
+        return { success: false, connected: false };
+    }
+}
+
+/**
+ * Get stream status from MediaMTX
+ */
+async function getStreamStatus(streamKey) {
+    try {
+        const response = await fetch(MEDIAMTX_API_BASE + '?action=stream_status&stream_key=' + streamKey);
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Failed to get stream status:', error);
+        return { success: false, status: 'error' };
+    }
+}
+
+/**
+ * Register stream to MediaMTX
+ */
+async function registerStream(streamKey, rtspUrl) {
+    try {
+        const response = await fetch(MEDIAMTX_API_BASE, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'register',
+                stream_key: streamKey,
+                rtsp_url: rtspUrl
+            })
+        });
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Failed to register stream:', error);
+        return { success: false, message: 'Failed to register stream' };
+    }
+}
+
+/**
+ * Unregister stream from MediaMTX
+ */
+async function unregisterStream(streamKey) {
+    try {
+        const response = await fetch(MEDIAMTX_API_BASE + '?stream_key=' + streamKey, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Failed to unregister stream:', error);
+        return { success: false, message: 'Failed to unregister stream' };
+    }
+}
+
