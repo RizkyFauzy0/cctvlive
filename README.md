@@ -22,7 +22,15 @@ A modern web application for managing RTSP camera streams with a beautiful dark-
 - Web server (Apache/Nginx)
 - Modern web browser
 
-### Installation
+### Installation Options
+
+Choose the installation method that suits your environment:
+
+- 📘 **[Local/VPS Installation](QUICKSTART.md)** - For local development or VPS servers
+- 🌐 **[Shared Hosting & aaPanel](INSTALL_HOSTING.md)** - For cPanel/Shared hosting and aaPanel
+- 🤖 **Automated Installation** - Use `install.sh` script (Linux/Mac)
+
+### Quick Installation (Local/VPS)
 
 1. **Clone the repository**
    ```bash
