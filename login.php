@@ -34,10 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Login successful
             loginUser($result['user'], $remember);
             
-            // Redirect to requested page or admin page
+            // Validate and redirect to requested page or admin page
             $baseUrl = getBaseUrl();
             $redirect = $_GET['redirect'] ?? '/admin.php';
-            header('Location: ' . $baseUrl . $redirect);
+            
+            // Security: Ensure redirect is internal and not an open redirect
+            // Only allow relative paths starting with /
+            if (!empty($redirect) && $redirect[0] === '/' && strpos($redirect, '//') === false) {
+                header('Location: ' . $baseUrl . $redirect);
+            } else {
+                header('Location: ' . $baseUrl . '/admin.php');
+            }
             exit;
         } else {
             $error = $result['message'];
@@ -213,13 +220,15 @@ $baseUrl = getBaseUrl();
                     </button>
                 </form>
 
-                <!-- Info Section -->
+                <!-- Info Section (Development Only) -->
+                <?php if (getenv('APP_ENV') !== 'production'): ?>
                 <div class="mt-6 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
                     <p>
                         <i class="fas fa-info-circle mr-1"></i>
                         Default credentials: <code class="text-blue-400">admin / admin123</code>
                     </p>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Back to Home -->

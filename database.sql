@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS cameras (
 -- Insert default admin user (password: admin123)
 -- Password hash generated using password_hash('admin123', PASSWORD_DEFAULT)
 INSERT INTO users (username, password, role, email) VALUES 
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'admin@cctvlive.local');
+('admin', '$2y$10$zYMBdGQo1iJjyOpc0J1UTenkb5yI1AOlwPwTnQuURIIlR00EOIF1C', 'admin', 'admin@cctvlive.local');
 
 -- Sample cameras for testing (optional)
 -- Uncomment to add sample data

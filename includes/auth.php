@@ -59,9 +59,11 @@ function authenticateUser($username, $password) {
             ];
         }
     } catch (PDOException $e) {
+        // Log error for debugging (in production, use proper logging)
+        error_log('Authentication error: ' . $e->getMessage());
         return [
             'success' => false,
-            'message' => 'Database error: ' . $e->getMessage(),
+            'message' => 'Authentication service temporarily unavailable',
             'user' => null
         ];
     }
