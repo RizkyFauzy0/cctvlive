@@ -1,5 +1,18 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']) && isset($_SESSION['username']);
+$currentUser = $isLoggedIn ? [
+    'username' => $_SESSION['username'],
+    'role' => $_SESSION['role'] ?? 'viewer'
+] : null;
+
 $pageTitle = $pageTitle ?? 'Live CCTV Manager';
 $baseUrl = getBaseUrl();
 ?>
@@ -87,6 +100,21 @@ $baseUrl = getBaseUrl();
                     <a href="<?php echo $baseUrl; ?>/admin.php" class="px-4 py-2 rounded-lg hover:bg-white/10 transition">
                         <i class="fas fa-cog mr-2"></i>Admin
                     </a>
+                    <?php if ($isLoggedIn): ?>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-gray-400 text-sm">
+                                <i class="fas fa-user mr-1"></i>
+                                <?php echo htmlspecialchars($currentUser['username']); ?>
+                            </span>
+                            <a href="<?php echo $baseUrl; ?>/logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?php echo $baseUrl; ?>/login.php" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -4,6 +4,11 @@
  * Dashboard with statistics and camera management
  */
 
+require_once __DIR__ . '/includes/auth.php';
+
+// Require login to access admin panel
+requireLogin();
+
 $pageTitle = 'Admin Panel - Live CCTV Manager';
 require_once __DIR__ . '/includes/header.php';
 
